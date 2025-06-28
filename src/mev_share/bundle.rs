@@ -12,35 +12,30 @@ use alloy::{
         },
     },
     signers::Signer,
-    transports::{http::Http, Transport, TransportResult},
+    transports::TransportResult,
 };
 
 use crate::MevHttp;
 
 /// A MEV-Share bundle hat can be sent or simulated.
 #[derive(Debug)]
-pub struct MevShareBundle<'a, P, C, N, S>
+pub struct MevShareBundle<'a, P, N, S>
 where
-    P: Provider<Http<C>, N>,
-    C: Clone,
+    P: Provider<N>,
     N: Network,
     S: Signer + Send + Sync + 'static,
-    Http<C>: Transport,
 {
     provider: &'a P,
     bundle: SendBundleRequest,
     bundle_signer: S,
-    phantom: PhantomData<(C, N)>,
+    phantom: PhantomData<N>,
 }
 
-impl<'a, P, C, N, S> MevShareBundle<'a, P, C, N, S>
+impl<'a, P, N, S> MevShareBundle<'a, P, N, S>
 where
-    P: Provider<Http<C>, N>,
-    C: Clone,
+    P: Provider<N>,
     N: Network,
     S: Signer + Send + Sync + 'static,
-    Http<C>: Transport,
-    MevHttp<C>: Transport,
 {
     /// Creates a new [`MevShareBundle`].
     pub fn new(provider: &'a P, bundle_signer: S) -> Self {

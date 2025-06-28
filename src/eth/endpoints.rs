@@ -50,7 +50,6 @@ impl<C> EndpointsBuilder<C>
 where
     C: Clone,
     Http<C>: Transport,
-    MevHttp<C>: Transport,
 {
     /// Adds a new transport to the [`Endpoints`] being built.
     pub fn endpoint(mut self, url: Url) -> Self {
@@ -63,7 +62,7 @@ where
     /// Adds a new transport to the [`Endpoints`] being built, using the given signer for header authentication.
     pub fn authenticated_endpoint(mut self, url: Url, bundle_signer: BundleSigner) -> Self {
         self.endpoints
-            .add(MevHttp::new(url, self.base_transport.clone(), bundle_signer).boxed());
+            .add(MevHttp::new(url, self.base_transport.clone().boxed(), bundle_signer).boxed());
 
         self
     }

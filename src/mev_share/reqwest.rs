@@ -13,22 +13,20 @@ use alloy::{
         },
     },
     signers::Signer,
-    transports::{http::Http, TransportErrorKind, TransportResult},
+    transports::{TransportErrorKind, TransportResult},
 };
 use async_trait::async_trait;
 
 use crate::{MevHttp, MevShareBundle, MevShareProviderExt};
 
 /// A [`MevShareBundle`] on Ethereun network using Reqwest HTTP transport.
-pub type EthereumReqwestMevShareBundle<'a, P, S> =
-    MevShareBundle<'a, P, Http<reqwest::Client>, Ethereum, S>;
+pub type EthereumReqwestMevShareBundle<'a, P, S> = MevShareBundle<'a, P, Ethereum, S>;
 
 #[async_trait]
-impl<F, P, N> MevShareProviderExt<reqwest::Client, N>
-    for FillProvider<F, P, Http<reqwest::Client>, N>
+impl<F, P, N> MevShareProviderExt<reqwest::Client, N> for FillProvider<F, P, N>
 where
     F: TxFiller<N>,
-    P: Provider<Http<reqwest::Client>, N>,
+    P: Provider<N>,
     N: Network,
     <N as Network>::TxEnvelope: Encodable2718 + Clone,
 {
@@ -51,7 +49,7 @@ where
         }
     }
 
-    fn build_bundle<S>(&self, bundle_signer: S) -> MevShareBundle<'_, Self, reqwest::Client, N, S>
+    fn build_bundle<S>(&self, bundle_signer: S) -> MevShareBundle<'_, Self, N, S>
     where
         S: Signer + Send + Sync + 'static,
     {

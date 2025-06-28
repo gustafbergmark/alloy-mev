@@ -13,7 +13,7 @@ use crate::MevShareBundle;
 
 /// Extension trait for sending and simulate MEV-Share bundles.
 #[async_trait]
-pub trait MevShareProviderExt<C, N>: Provider<Http<C>, N> + Sized
+pub trait MevShareProviderExt<C, N>: Provider<N> + Sized
 where
     C: Clone,
     N: Network,
@@ -27,7 +27,7 @@ where
     ) -> TransportResult<BundleItem>;
 
     /// Returns a builder-style [`MevShareBundle`] that can be sent or simulated.
-    fn build_bundle<S>(&self, bundle_signer: S) -> MevShareBundle<'_, Self, C, N, S>
+    fn build_bundle<S>(&self, bundle_signer: S) -> MevShareBundle<'_, Self, N, S>
     where
         S: Signer + Send + Sync + 'static;
 

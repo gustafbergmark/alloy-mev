@@ -1,6 +1,7 @@
 use std::task::{Context, Poll};
 
 use alloy::rpc::json_rpc::{RequestPacket, ResponsePacket};
+use alloy::transports::http::Http;
 use alloy::{
     primitives::{hex, keccak256},
     transports::{TransportError, TransportErrorKind, TransportFut},
@@ -9,7 +10,7 @@ use tower::Service;
 
 use crate::MevHttp;
 
-impl MevHttp<reqwest::Client> {
+impl MevHttp {
     fn send_request(&self, req: RequestPacket) -> TransportFut<'static> {
         let this = self.clone();
 
@@ -23,8 +24,12 @@ impl MevHttp<reqwest::Client> {
                 .await
                 .map_err(TransportErrorKind::custom)?;
 
-            this.http
-                .client()
+            let http: &Http<reqwest::Client> = this
+                .transport
+                .as_any()
+                .downcast_ref()
+                .expect("Invalid transport");
+            http.client()
                 .post(this.endpoint)
                 .header(
                     &this.bundle_signer.header,
@@ -45,7 +50,7 @@ impl MevHttp<reqwest::Client> {
     }
 }
 
-impl Service<RequestPacket> for MevHttp<reqwest::Client> {
+impl Service<RequestPacket> for MevHttp {
     type Response = ResponsePacket;
     type Error = TransportError;
     type Future = TransportFut<'static>;
@@ -62,9 +67,9 @@ impl Service<RequestPacket> for MevHttp<reqwest::Client> {
                 m if m.starts_with("mev_") || m.starts_with("eth_") => {
                     self.send_request(single.into())
                 }
-                _ => self.http.call(single.into()),
+                _ => self.transport.call(single.into()),
             },
-            other => self.http.call(other),
+            other => self.transport.call(other),
         }
     }
 }
